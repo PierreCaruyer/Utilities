@@ -31,21 +31,22 @@ public final class FilesUtils {
 
     @Contract("null -> !null")
     public static final Collection<File> dirFiles(final File file) {
-        return file == null ? Collections.emptyList() : dirFiles(file.getAbsolutePath());
-    }
-
-    public static final Collection<File> dirFiles(final String path) {
-        if(!fileExists(path)) {
+        if(!fileExists(file)) {
             return Collections.emptyList();
         }
-        final File file = new File(path);
         final File[] files = file.listFiles();
         if(files == null) {
             return Collections.emptyList();
         }
         return Arrays.stream(files)
-                    .filter(File::isFile)
-                    .collect(Collectors.toList());
+                .filter(File::isFile)
+                .collect(Collectors.toList());
+    }
+
+    public static final Collection<File> dirFiles(final String path) {
+        return StringUtils.isNullOrEmpty(path) ?
+                Collections.emptyList() :
+                dirFiles(new File(path));
     }
 
     public static final boolean fileExists(final String filePath) {
@@ -57,7 +58,7 @@ public final class FilesUtils {
         return file != null && file.exists();
    }
 
-    public static final int getFileLines(final File file) {
+    public static final int getFileLinesCount(final File file) {
         if(!fileExists(file) || !file.isFile()) {
             return 0;
         }
@@ -66,7 +67,7 @@ public final class FilesUtils {
             final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             for(;reader.readLine() != null; ++count);
             reader.close();
-        } catch(IOException ioe) {
+        } catch(final IOException ioe) {
             ioe.printStackTrace();
         }
         return count;
